@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
 
 public class GameHandler : MonoBehaviour
@@ -33,6 +34,11 @@ public class GameHandler : MonoBehaviour
     float difficulty = 1.0f;
     float diffTimer;
     float startDiffTimer = 3.0f;
+
+	GameObject gameOverCanvas;
+	bool gameOver = false;
+
+	GameObject audioManager;
 
     string[] shaderText = new string[46]
     {
@@ -90,14 +96,26 @@ public class GameHandler : MonoBehaviour
         GameObject mainCameraObj = new GameObject();
         mainCameraObj.transform.name = "MainCamera";
         mainCameraObj.AddComponent<Camera>();
+		mainCameraObj.AddComponent<AudioListener>();
         mainCamera = mainCameraObj.GetComponent<Camera>();
+		mainCamera.clearFlags = CameraClearFlags.Color;
         mainCamera.orthographic = true;
         mainCamera.transform.position = new Vector3(0.0f, 4.0f, -10.0f);
         mainCamera.transform.Rotate(15.0f, 0.0f, 0.0f);
 
+		audioManager = new GameObject();
+        audioManager.transform.name = "AudioManager";
+		audioManager.AddComponent<AudioSource>();
+		StartCoroutine(LoadAudio());
+
         CreateShader();
 
         CreateMaterial();
+
+		GameObject eventSystem = new GameObject();
+		eventSystem.transform.name = "EventSystem";
+		eventSystem.AddComponent<EventSystem>();
+		eventSystem.AddComponent<StandaloneInputModule>();
 
         //player = GameObject.CreatePrimitive(PrimitiveType.Cube);
         boat = new GameObject();
@@ -123,13 +141,11 @@ public class GameHandler : MonoBehaviour
         GiveColor(boat, new Color(0.25f, 0.1f, 0.1f, 1.0f));
         boat.AddComponent<BoxCollider2D>();
         boat.GetComponent<BoxCollider2D>().size = new Vector2(1.4f, 1f);
-		boat.AddComponent<Rigidbody2D>();
-		boat.GetComponent<Rigidbody2D>().mass = 0.0f;
 		boat.AddComponent<BoatCollision>();
 
-        gameManager = new GameObject();
-        gameManager.transform.name = "OneScript";
-        gameManager.AddComponent<OneScript>();
+        // gameManager = new GameObject();
+        // gameManager.transform.name = "OneScript";
+        // gameManager.AddComponent<OneScript>();
 
         water = new GameObject();
         water.transform.name = "Water";
@@ -137,9 +153,9 @@ public class GameHandler : MonoBehaviour
         water.AddComponent<WaterLine>();
         theWaterLine = water.GetComponent<WaterLine>();
 
-		GameObject highScoreManager = new GameObject();
-		highScoreManager.transform.name = "HighScoreManager";
-		highScoreManager.AddComponent<HighScores>();
+		// GameObject highScoreManager = new GameObject();
+		// highScoreManager.transform.name = "HighScoreManager";
+		// highScoreManager.AddComponent<HighScores>();
 
         // UI
         GameObject mainCanvas = new GameObject();
@@ -164,8 +180,78 @@ public class GameHandler : MonoBehaviour
         //scoreObj.GetComponent<RectTransform>().position = new Vector3(0.0f, -10.0f, 0.0f);
         scoreText = scoreObj.GetComponent<TextMeshProUGUI>();
 
+		gameOverCanvas = new GameObject();
+        gameOverCanvas.transform.name = "GameOverCanvas";
+        gameOverCanvas.AddComponent<Canvas>();
+        gameOverCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
+		gameOverCanvas.AddComponent<GraphicRaycaster>();
+
+		GameObject restartBtn = new GameObject();
+		restartBtn.transform.name = "RestartBtn";
+		restartBtn.AddComponent<Button>();
+		restartBtn.GetComponent<Button>().onClick.AddListener(() => RestartLevel());
+		restartBtn.AddComponent<TextMeshProUGUI>();
+		restartBtn.GetComponent<TextMeshProUGUI>().text = "Restart";
+		restartBtn.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+		restartBtn.transform.SetParent(gameOverCanvas.transform);
+		restartBtn.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
+        restartBtn.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
+        restartBtn.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
+        restartBtn.GetComponent<RectTransform>().anchoredPosition = new Vector3(0.0f, 0.0f, 0.0f);
+
+		GameObject restartBtnBG = new GameObject();
+        restartBtnBG.transform.name = "RestartBtnBG";
+		restartBtnBG.transform.SetParent(restartBtn.transform);
+		restartBtnBG.AddComponent<Image>();
+		restartBtnBG.GetComponent<Image>().color = new Color(0.0f, 0.0f, 0.0f, 0.2f);
+		SetAndStretchToParentSize(restartBtnBG.GetComponent<RectTransform>(), restartBtnBG.transform.parent.GetComponent<RectTransform>());
+		restartBtnBG.GetComponent<RectTransform>().anchoredPosition = new Vector2(0.0f, 0.0f);
+		restartBtn.GetComponent<Button>().targetGraphic = restartBtnBG.GetComponent<Image>();
+
+		gameOverCanvas.SetActive(false);
+
         StartCoroutine(RockSpawning());
     }
+
+	IEnumerator LoadAudio()
+	{
+		const string musicURL = "http://www.brainybetty.com/FacebookFans/Feb112010/ChillingMusic.wav";
+
+		WWW www = new WWW(musicURL);
+		yield return www;
+		audioManager.GetComponent<AudioSource>().clip = www.GetAudioClip(false, false);
+		audioManager.GetComponent<AudioSource>().loop = true;
+		audioManager.GetComponent<AudioSource>().Play();
+
+		if(string.IsNullOrEmpty(www.error))
+		{
+			print("yay, audio loaded");
+		}
+		else
+		{
+			print("error");
+		}
+	}
+
+	public void ActivateGameOver()
+	{
+		gameOver = true;
+		StopAllCoroutines();
+		gameOverCanvas.SetActive(true);
+	}
+
+	public void RestartLevel()
+	{
+		SceneManager.LoadScene(FindObjectOfType<OneScript>().GetSceneName());
+	}
+
+	private void OnDestroy() 
+	{
+		foreach(Button btn in GameObject.FindObjectsOfType<Button>())
+		{
+			btn.onClick.RemoveAllListeners();
+		}
+	}
 
     IEnumerator RockSpawning()
     {
@@ -183,6 +269,9 @@ public class GameHandler : MonoBehaviour
         rocks.Add(rock);
         rock.AddComponent<BoxCollider2D>();
 		rock.GetComponent<BoxCollider2D>().offset = new Vector2(1.2f, 1.0f);
+		rock.AddComponent<Rigidbody2D>();
+		rock.GetComponent<Rigidbody2D>().mass = 0.0f;
+		rock.GetComponent<Rigidbody2D>().gravityScale = 0.0f;
         rock.AddComponent<DestoyRock>();
         rock.transform.name = "Rock";
         CreateRock(rock);
@@ -195,6 +284,10 @@ public class GameHandler : MonoBehaviour
 
     void Update()
     {
+		if(gameOver)
+		{
+			return;
+		}
         score += Time.deltaTime;
         scoreText.text = score.ToString("F2");
         diffTimer -= Time.deltaTime;
@@ -567,6 +660,7 @@ public class BoatCollision : MonoBehaviour
 	{
 		if(other.transform.name == "Rock")
 		{
+			FindObjectOfType<GameHandler>().ActivateGameOver();
 			Debug.Log("RIP");
 		}	
 	}
@@ -576,24 +670,42 @@ public class DestoyRock : MonoBehaviour
 {
     void OnDestroy()
     {
-        FindObjectOfType<GameHandler>().rocks.Remove(gameObject);
+		if(FindObjectOfType<GameHandler>().rocks.Count > 0)
+        	FindObjectOfType<GameHandler>().rocks.Remove(gameObject);
     }
 }
 
 public class OneScript : MonoBehaviour
 {
-    static Scene newScene;
-    [RuntimeInitializeOnLoadMethod]
-    static void OnRuntimeMethodLoad()
-    {
-        newScene = SceneManager.CreateScene("OneScriptScene");
-        SceneManager.LoadScene("OneScriptScene", LoadSceneMode.Single);
-        SceneManager.SetActiveScene(SceneManager.GetSceneByName("OneScriptScene"));
+    // static Scene newScene;
+	public static string sceneName;
+
+    // [RuntimeInitializeOnLoadMethod]
+    // static void OnRuntimeMethodLoad()
+    // {
+	// 	sceneName = "OneScriptScene"; 
+    //     //newScene = SceneManager.CreateScene("OneScriptScene");
+    //     SceneManager.LoadScene("OneScriptScene", LoadSceneMode.Single);
+    //     SceneManager.SetActiveScene(SceneManager.GetSceneByName("OneScriptScene"));
         
-        GameObject go = new GameObject();
+    //     GameObject go = new GameObject();
+    //     go.transform.name = "GameHandler";
+    //     go.AddComponent<GameHandler>().StartGame();
+    // }
+
+	void Start()
+	{
+		sceneName = "OneScriptScene"; 
+		
+	    GameObject go = new GameObject();
         go.transform.name = "GameHandler";
         go.AddComponent<GameHandler>().StartGame();
-    }
+	}
+
+	public string GetSceneName()
+	{
+		return sceneName;
+	}
 }
 
 #region water
