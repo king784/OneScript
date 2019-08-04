@@ -35,10 +35,10 @@ public class GameHandler : MonoBehaviour
     float diffTimer;
     float startDiffTimer = 3.0f;
 
-	GameObject gameOverCanvas;
-	bool gameOver = false;
+    GameObject gameOverCanvas;
+    bool gameOver = false;
 
-	GameObject audioManager;
+    GameObject audioManager;
 
     string[] shaderText = new string[46]
     {
@@ -96,26 +96,26 @@ public class GameHandler : MonoBehaviour
         GameObject mainCameraObj = new GameObject();
         mainCameraObj.transform.name = "MainCamera";
         mainCameraObj.AddComponent<Camera>();
-		mainCameraObj.AddComponent<AudioListener>();
+        mainCameraObj.AddComponent<AudioListener>();
         mainCamera = mainCameraObj.GetComponent<Camera>();
-		mainCamera.clearFlags = CameraClearFlags.Color;
+        mainCamera.clearFlags = CameraClearFlags.Color;
         mainCamera.orthographic = true;
         mainCamera.transform.position = new Vector3(0.0f, 4.0f, -10.0f);
         mainCamera.transform.Rotate(15.0f, 0.0f, 0.0f);
 
-		audioManager = new GameObject();
+        audioManager = new GameObject();
         audioManager.transform.name = "AudioManager";
-		audioManager.AddComponent<AudioSource>();
-		StartCoroutine(LoadAudio());
+        audioManager.AddComponent<AudioSource>();
+        StartCoroutine(LoadAudio());
 
         CreateShader();
 
         CreateMaterial();
 
-		GameObject eventSystem = new GameObject();
-		eventSystem.transform.name = "EventSystem";
-		eventSystem.AddComponent<EventSystem>();
-		eventSystem.AddComponent<StandaloneInputModule>();
+        GameObject eventSystem = new GameObject();
+        eventSystem.transform.name = "EventSystem";
+        eventSystem.AddComponent<EventSystem>();
+        eventSystem.AddComponent<StandaloneInputModule>();
 
         //player = GameObject.CreatePrimitive(PrimitiveType.Cube);
         boat = new GameObject();
@@ -141,7 +141,7 @@ public class GameHandler : MonoBehaviour
         GiveColor(boat, new Color(0.25f, 0.1f, 0.1f, 1.0f));
         boat.AddComponent<BoxCollider2D>();
         boat.GetComponent<BoxCollider2D>().size = new Vector2(1.4f, 1f);
-		boat.AddComponent<BoatCollision>();
+        boat.AddComponent<BoatCollision>();
 
         // gameManager = new GameObject();
         // gameManager.transform.name = "OneScript";
@@ -153,9 +153,9 @@ public class GameHandler : MonoBehaviour
         water.AddComponent<WaterLine>();
         theWaterLine = water.GetComponent<WaterLine>();
 
-		// GameObject highScoreManager = new GameObject();
-		// highScoreManager.transform.name = "HighScoreManager";
-		// highScoreManager.AddComponent<HighScores>();
+        // GameObject highScoreManager = new GameObject();
+        // highScoreManager.transform.name = "HighScoreManager";
+        // highScoreManager.AddComponent<HighScores>();
 
         // UI
         GameObject mainCanvas = new GameObject();
@@ -180,82 +180,82 @@ public class GameHandler : MonoBehaviour
         //scoreObj.GetComponent<RectTransform>().position = new Vector3(0.0f, -10.0f, 0.0f);
         scoreText = scoreObj.GetComponent<TextMeshProUGUI>();
 
-		gameOverCanvas = new GameObject();
+        gameOverCanvas = new GameObject();
         gameOverCanvas.transform.name = "GameOverCanvas";
         gameOverCanvas.AddComponent<Canvas>();
         gameOverCanvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
-		gameOverCanvas.AddComponent<GraphicRaycaster>();
+        gameOverCanvas.AddComponent<GraphicRaycaster>();
 
-		GameObject restartBtn = new GameObject();
-		restartBtn.transform.name = "RestartBtn";
-		restartBtn.AddComponent<Button>();
-		restartBtn.GetComponent<Button>().onClick.AddListener(() => RestartLevel());
-		restartBtn.AddComponent<TextMeshProUGUI>();
-		restartBtn.GetComponent<TextMeshProUGUI>().text = "Restart";
-		restartBtn.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
-		restartBtn.transform.SetParent(gameOverCanvas.transform);
-		restartBtn.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
+        GameObject restartBtn = new GameObject();
+        restartBtn.transform.name = "RestartBtn";
+        restartBtn.AddComponent<Button>();
+        restartBtn.GetComponent<Button>().onClick.AddListener(() => RestartLevel());
+        restartBtn.AddComponent<TextMeshProUGUI>();
+        restartBtn.GetComponent<TextMeshProUGUI>().text = "Restart";
+        restartBtn.GetComponent<TextMeshProUGUI>().alignment = TextAlignmentOptions.Center;
+        restartBtn.transform.SetParent(gameOverCanvas.transform);
+        restartBtn.GetComponent<RectTransform>().anchorMin = new Vector2(0.5f, 0.5f);
         restartBtn.GetComponent<RectTransform>().anchorMax = new Vector2(0.5f, 0.5f);
         restartBtn.GetComponent<RectTransform>().pivot = new Vector2(0.5f, 0.5f);
         restartBtn.GetComponent<RectTransform>().anchoredPosition = new Vector3(0.0f, 0.0f, 0.0f);
 
-		GameObject restartBtnBG = new GameObject();
+        GameObject restartBtnBG = new GameObject();
         restartBtnBG.transform.name = "RestartBtnBG";
-		restartBtnBG.transform.SetParent(restartBtn.transform);
-		restartBtnBG.AddComponent<Image>();
-		restartBtnBG.GetComponent<Image>().color = new Color(0.0f, 0.0f, 0.0f, 0.2f);
-		SetAndStretchToParentSize(restartBtnBG.GetComponent<RectTransform>(), restartBtnBG.transform.parent.GetComponent<RectTransform>());
-		restartBtnBG.GetComponent<RectTransform>().anchoredPosition = new Vector2(0.0f, 0.0f);
-		restartBtn.GetComponent<Button>().targetGraphic = restartBtnBG.GetComponent<Image>();
+        restartBtnBG.transform.SetParent(restartBtn.transform);
+        restartBtnBG.AddComponent<Image>();
+        restartBtnBG.GetComponent<Image>().color = new Color(0.0f, 0.0f, 0.0f, 0.2f);
+        SetAndStretchToParentSize(restartBtnBG.GetComponent<RectTransform>(), restartBtnBG.transform.parent.GetComponent<RectTransform>());
+        restartBtnBG.GetComponent<RectTransform>().anchoredPosition = new Vector2(0.0f, 0.0f);
+        restartBtn.GetComponent<Button>().targetGraphic = restartBtnBG.GetComponent<Image>();
 
-		gameOverCanvas.SetActive(false);
+        gameOverCanvas.SetActive(false);
 
         StartCoroutine(RockSpawning());
     }
 
-	IEnumerator LoadAudio()
-	{
-		const string musicURL = "http://www.brainybetty.com/FacebookFans/Feb112010/ChillingMusic.wav";
+    IEnumerator LoadAudio()
+    {
+        const string musicURL = "http://www.brainybetty.com/FacebookFans/Feb112010/ChillingMusic.wav";
 
-		WWW www = new WWW(musicURL);
-		yield return www;
-		audioManager.GetComponent<AudioSource>().clip = www.GetAudioClip(false, false);
-		audioManager.GetComponent<AudioSource>().loop = true;
-		audioManager.GetComponent<AudioSource>().Play();
+        WWW www = new WWW(musicURL);
+        yield return www;
+        audioManager.GetComponent<AudioSource>().clip = www.GetAudioClip(false, false);
+        audioManager.GetComponent<AudioSource>().loop = true;
+        audioManager.GetComponent<AudioSource>().Play();
 
-		if(string.IsNullOrEmpty(www.error))
-		{
-			print("yay, audio loaded");
-		}
-		else
-		{
-			print("error");
-		}
-	}
+        if (string.IsNullOrEmpty(www.error))
+        {
+            print("yay, audio loaded");
+        }
+        else
+        {
+            print("error");
+        }
+    }
 
-	public void ActivateGameOver()
-	{
-		gameOver = true;
-		StopAllCoroutines();
-		gameOverCanvas.SetActive(true);
-	}
+    public void ActivateGameOver()
+    {
+        gameOver = true;
+        StopAllCoroutines();
+        gameOverCanvas.SetActive(true);
+    }
 
-	public void RestartLevel()
-	{
-		SceneManager.LoadScene(FindObjectOfType<OneScript>().GetSceneName());
-	}
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(FindObjectOfType<OneScript>().GetSceneName());
+    }
 
-	private void OnDestroy() 
-	{
-		foreach(Button btn in GameObject.FindObjectsOfType<Button>())
-		{
-			btn.onClick.RemoveAllListeners();
-		}
-	}
+    private void OnDestroy()
+    {
+        foreach (Button btn in GameObject.FindObjectsOfType<Button>())
+        {
+            btn.onClick.RemoveAllListeners();
+        }
+    }
 
     IEnumerator RockSpawning()
     {
-        while(true)
+        while (true)
         {
             SpawnRock();
             yield return new WaitForSeconds(3.0f * difficulty);
@@ -268,10 +268,10 @@ public class GameHandler : MonoBehaviour
         GameObject rock = new GameObject();
         rocks.Add(rock);
         rock.AddComponent<BoxCollider2D>();
-		rock.GetComponent<BoxCollider2D>().offset = new Vector2(1.2f, 1.0f);
-		rock.AddComponent<Rigidbody2D>();
-		rock.GetComponent<Rigidbody2D>().mass = 0.0f;
-		rock.GetComponent<Rigidbody2D>().gravityScale = 0.0f;
+        rock.GetComponent<BoxCollider2D>().offset = new Vector2(1.2f, 1.0f);
+        rock.AddComponent<Rigidbody2D>();
+        rock.GetComponent<Rigidbody2D>().mass = 0.0f;
+        rock.GetComponent<Rigidbody2D>().gravityScale = 0.0f;
         rock.AddComponent<DestoyRock>();
         rock.transform.name = "Rock";
         CreateRock(rock);
@@ -284,20 +284,24 @@ public class GameHandler : MonoBehaviour
 
     void Update()
     {
-		if(gameOver)
-		{
-			return;
-		}
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+        if (gameOver)
+        {
+            return;
+        }
         score += Time.deltaTime;
         scoreText.text = score.ToString("F2");
         diffTimer -= Time.deltaTime;
-        if(diffTimer < 0.0f)
+        if (diffTimer < 0.0f)
         {
             diffTimer = startDiffTimer;
             difficulty -= 0.05f;
         }
 
-        foreach(GameObject obj in rocks)
+        foreach (GameObject obj in rocks)
         {
             obj.transform.Translate(Vector3.right * -0.14f);
         }
@@ -311,7 +315,7 @@ public class GameHandler : MonoBehaviour
     IEnumerator Fade()
     {
         float lerp = 0.0f;
-        while(lerp < 1.0f)
+        while (lerp < 1.0f)
         {
             fadeImg.GetComponent<Image>().color = Color.Lerp(Color.black, Color.clear, lerp);
             lerp += Time.deltaTime;
@@ -322,14 +326,14 @@ public class GameHandler : MonoBehaviour
     void BoatMovement()
     {
         velocity.y -= 0.01f;
-        if(boat.transform.position.y <= startPos.y)
+        if (boat.transform.position.y <= startPos.y)
         {
             boat.transform.position = new Vector3(boat.transform.position.x, startPos.y, boat.transform.position.z);
             velocity.y = 0;
             isInAir = false;
         }
 
-        if((Input.GetButtonDown("Jump") || Input.touchCount > 0) && !isInAir)
+        if ((Input.GetButtonDown("Jump") || Input.touchCount > 0) && !isInAir)
         {
             theWaterLine.parts[19].gameObject.transform.Translate(0.0f, 2.0f, 0.0f);
             boat.transform.Rotate(0.0f, 0.0f, 20.0f);
@@ -338,7 +342,7 @@ public class GameHandler : MonoBehaviour
         }
 
         velocity.z = 0;
-        boat.transform.Translate(0.0f, -velocity.y, 0.0f); 
+        boat.transform.Translate(0.0f, -velocity.y, 0.0f);
     }
 
     // https://answers.unity.com/questions/1007886/how-to-set-the-new-unity-ui-rect-transform-anchor.html
@@ -607,9 +611,9 @@ public class GameHandler : MonoBehaviour
 
     void CreateShader()
     {
-        using(TextWriter tw = File.CreateText("Assets/SuperShader.shader"))
+        using (TextWriter tw = File.CreateText(Path.Combine(Application.persistentDataPath, "SuperShader.shader")))
         {
-            for(int i = 0; i < shaderText.Length; i++)
+            for (int i = 0; i < shaderText.Length; i++)
             {
                 tw.WriteLine(shaderText[i]);
             }
@@ -629,83 +633,83 @@ public class GameHandler : MonoBehaviour
 
 public class HighScores : MonoBehaviour
 {
-	const string privateCode = "MuRxpKnQ5UG6MFxUiHFIPwDD1q5H_RN0C85s85gPySsw";
-	const string publicCode = "5d466ad97682811758c1fad5";
-	const string webURL = "http://dreamlo.com/lb/";
+    const string privateCode = "MuRxpKnQ5UG6MFxUiHFIPwDD1q5H_RN0C85s85gPySsw";
+    const string publicCode = "5d466ad97682811758c1fad5";
+    const string webURL = "http://dreamlo.com/lb/";
 
-	public void StartUploadingHighscore(string username, float newHighscore)
-	{
-		StartCoroutine(UploadHighscore(username, newHighscore));
-	}
+    public void StartUploadingHighscore(string username, float newHighscore)
+    {
+        StartCoroutine(UploadHighscore(username, newHighscore));
+    }
 
-	IEnumerator UploadHighscore(string username, float newHighscore)
-	{
-		WWW www = new WWW(webURL + privateCode + "/add/" + WWW.EscapeURL(username) + "/" + newHighscore);
-		yield return www;
+    IEnumerator UploadHighscore(string username, float newHighscore)
+    {
+        WWW www = new WWW(webURL + privateCode + "/add/" + WWW.EscapeURL(username) + "/" + newHighscore);
+        yield return www;
 
-		if(string.IsNullOrEmpty(www.error))
-		{
-			print("yay");
-		}
-		else
-		{
-			print("error");
-		}
-	}
+        if (string.IsNullOrEmpty(www.error))
+        {
+            print("yay");
+        }
+        else
+        {
+            print("error");
+        }
+    }
 }
 
 public class BoatCollision : MonoBehaviour
 {
-	private void OnCollisionEnter2D(Collision2D other) 
-	{
-		if(other.transform.name == "Rock")
-		{
-			FindObjectOfType<GameHandler>().ActivateGameOver();
-			Debug.Log("RIP");
-		}	
-	}
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.transform.name == "Rock")
+        {
+            FindObjectOfType<GameHandler>().ActivateGameOver();
+            Debug.Log("RIP");
+        }
+    }
 }
 
 public class DestoyRock : MonoBehaviour
 {
     void OnDestroy()
     {
-		if(FindObjectOfType<GameHandler>().rocks.Count > 0)
-        	FindObjectOfType<GameHandler>().rocks.Remove(gameObject);
+        if (FindObjectOfType<GameHandler>().rocks.Count > 0)
+            FindObjectOfType<GameHandler>().rocks.Remove(gameObject);
     }
 }
 
 public class OneScript : MonoBehaviour
 {
     // static Scene newScene;
-	public static string sceneName;
+    public static string sceneName;
 
     // [RuntimeInitializeOnLoadMethod]
     // static void OnRuntimeMethodLoad()
     // {
-	// 	sceneName = "OneScriptScene"; 
+    // 	sceneName = "OneScriptScene"; 
     //     //newScene = SceneManager.CreateScene("OneScriptScene");
     //     SceneManager.LoadScene("OneScriptScene", LoadSceneMode.Single);
     //     SceneManager.SetActiveScene(SceneManager.GetSceneByName("OneScriptScene"));
-        
+
     //     GameObject go = new GameObject();
     //     go.transform.name = "GameHandler";
     //     go.AddComponent<GameHandler>().StartGame();
     // }
 
-	void Start()
-	{
-		sceneName = "OneScriptScene"; 
-		
-	    GameObject go = new GameObject();
+    void Start()
+    {
+        sceneName = "OneScriptScene";
+
+        GameObject go = new GameObject();
         go.transform.name = "GameHandler";
         go.AddComponent<GameHandler>().StartGame();
-	}
+    }
 
-	public string GetSceneName()
-	{
-		return sceneName;
-	}
+    public string GetSceneName()
+    {
+        return sceneName;
+    }
 }
 
 #region water
@@ -713,261 +717,261 @@ public class OneScript : MonoBehaviour
 
 public struct WaterLinePart
 {
-  public float height;
-  public float velocity;
-  public GameObject gameObject;
-  public Mesh mesh;
-  public Vector2 boundsMin;
-  public Vector2 boundsMax;
+    public float height;
+    public float velocity;
+    public GameObject gameObject;
+    public Mesh mesh;
+    public Vector2 boundsMin;
+    public Vector2 boundsMax;
 }
 
 public class WaterLine : MonoBehaviour
 {
-  public float velocityDamping = 0.4f; // Proportional velocity damping, must be less than or equal to 1.
-  public float timeScale = 25f;
+    public float velocityDamping = 0.4f; // Proportional velocity damping, must be less than or equal to 1.
+    public float timeScale = 25f;
 
-  public int Width = 50;
-  public float Height = 10f;
-  public Material material;
-  public Color color = Color.blue;
+    public int Width = 50;
+    public float Height = 10f;
+    public Material material;
+    public Color color = Color.blue;
 
-  public WaterLinePart[] parts;
+    public WaterLinePart[] parts;
 
-  private int size;
-  private float currentHeight;
-
-#if UNITY_EDITOR
-  private bool cleanRequested;
-#endif
-
-  void Start()
-  {
-
-    material = FindObjectOfType<GameHandler>().superMaterial;
+    private int size;
+    private float currentHeight;
 
 #if UNITY_EDITOR
-    // Remove what we see from the editor
-    Clear();
+    private bool cleanRequested;
 #endif
 
-    Initialize();
-  }
-
-  private void Initialize()
-  {
-    size = Width;
-    currentHeight = Height;
-
-    material.color = color;
-
-    parts = new WaterLinePart[size];
-
-    // we'll use spheres to represent each vertex for demonstration purposes
-    for (int i = 0; i < size; i++)
+    void Start()
     {
-      // Create a game object
-      GameObject go = new GameObject("WavePart");
-      go.transform.parent = this.transform;
-      go.transform.localPosition = new Vector3(i - (size / 2), 0, 0);
 
-      parts[i].gameObject = go;
-    }
-
-    // Create the meshes
-    for (int i = 0; i < size; i++)
-    {
-      GameObject go = parts[i].gameObject;
-
-      // Except for the last point
-      if (i < size - 1)
-      {
-        Mesh mesh = new Mesh();
-        mesh.MarkDynamic();
-        parts[i].mesh = mesh;
-
-        go.AddComponent<MeshFilter>();
-        go.AddComponent<MeshRenderer>();
-
-        // Define vertices for the mesh (the points of the model)
-        UpdateMeshVertices(i);
-
-        // Define triangles and normals
-        InitializeTrianglesAndNormalsForMesh(i);
-
-        go.GetComponent<MeshFilter>().mesh = mesh;
-        go.GetComponent<MeshRenderer>().material = material;
-      }
-    }
-
-    // Small wave
-    Splash(size / 2, 10);
-  }
+        material = FindObjectOfType<GameHandler>().superMaterial;
 
 #if UNITY_EDITOR
-  /// <summary>
-  /// SUPER VIOLENT METHOD FOR EDITOR MODE
-  /// </summary>
-  private void Clear()
-  {
-    for (int i = 0; i < size; i++)
-    {
-      DestroyImmediate(parts[i].mesh);
-      DestroyImmediate(parts[i].gameObject);
-    }
-
-    parts = null;
-  }
+        // Remove what we see from the editor
+        Clear();
 #endif
 
-  private void UpdateMeshVertices(int i)
-  {
-    Mesh mesh = parts[i].mesh;
-    if (mesh == null) return;
-
-    Transform current = parts[i].gameObject.transform;
-
-    Transform next = current;
-    if (i < parts.Length - 1)
-    {
-      next = parts[i + 1].gameObject.transform;
+        Initialize();
     }
 
-    Vector3 left = Vector3.zero;
-    Vector3 right = next.localPosition - current.localPosition;
-
-    // Get all parts of the mesh (it's just 2 planes, one on top and one on the front face)
-    Vector3 topLeftFront = new Vector3(left.x, left.y, 0);
-    Vector3 topRightFront = new Vector3(right.x, right.y, 0);
-    Vector3 topLeftBack = new Vector3(left.x, left.y, 1);
-    Vector3 topRightBack = new Vector3(right.x, right.y, 1);
-    Vector3 bottomLeftFront = new Vector3(left.x, left.y + (0 - Height), 0);
-    Vector3 bottomRightFront = new Vector3(right.x, right.y + (0 - Height), 0);
-
-    mesh.vertices = new Vector3[] { topLeftFront, topRightFront, topLeftBack, topRightBack, bottomLeftFront, bottomRightFront };
-
-    parts[i].boundsMin = topLeftFront + current.position;
-    parts[i].boundsMax = bottomRightFront + current.position;
-  }
-
-  private void InitializeTrianglesAndNormalsForMesh(int i)
-  {
-    Mesh mesh = parts[i].mesh;
-    if (mesh == null) return;
-
-    // Normals
-    var uvs = new Vector2[mesh.vertices.Length];
-    for (int i2 = 0; i2 < uvs.Length; i2++)
+    private void Initialize()
     {
-      uvs[i2] = new Vector2(mesh.vertices[i2].x, mesh.vertices[i2].z);
-    }
-    mesh.uv = uvs;
+        size = Width;
+        currentHeight = Height;
 
-    // Triangles
-    mesh.triangles = new int[] { 5, 4, 0, 0, 1, 5, 0, 2, 3, 3, 1, 0 };
+        material.color = color;
 
-    // For shader
-    mesh.RecalculateNormals();
-  }
+        parts = new WaterLinePart[size];
 
-  void Update()
-  {
-#if UNITY_EDITOR
-    // Size has been updated?
-    if (Width != size || Height != currentHeight)
-    {
-      cleanRequested = true;
-    }
-
-    // Recalculate everything!
-    // This should be for the editor only!
-    if (cleanRequested)
-    {
-      cleanRequested = false;
-      Debug.Log("Reinitializing water. Make sure we are in editor mode!");
-      Clear();
-      Initialize();
-    }
-
-    color = material.color;
-#endif
-
-    // Water tension is simulated by a simple linear convolution over the height field.
-    for (int i = 1; i < size - 1; i++)
-    {
-#if UNITY_EDITOR
-      // Objects deleted from editor
-      if (parts[i].gameObject == null)
-      {
-        cleanRequested = true;
-        return;
-      }
-#endif
-      int j = i - 1;
-      int k = i + 1;
-      parts[i].height = (parts[i].gameObject.transform.localPosition.y + parts[j].gameObject.transform.localPosition.y + parts[k].gameObject.transform.localPosition.y) / 3.0f;
-    }
-
-    // Velocity and height are updated...
-    for (int i = 0; i < size; i++)
-    {
-      // update velocity and height
-      parts[i].velocity = (parts[i].velocity + (parts[i].height - parts[i].gameObject.transform.localPosition.y)) * velocityDamping;
-
-      float timeFactor = Time.deltaTime * timeScale;
-      if (timeFactor > 1f) timeFactor = 1f;
-
-      parts[i].height += parts[i].velocity * timeFactor;
-
-      // Update the dot position
-      Vector3 newPosition = new Vector3(
-          parts[i].gameObject.transform.localPosition.x,
-          parts[i].height,
-          parts[i].gameObject.transform.localPosition.z);
-      parts[i].gameObject.transform.localPosition = newPosition;
-    }
-
-    // Update meshes
-    for (int i = 0; i < size; i++)
-    {
-      UpdateMeshVertices(i);
-    }
-  }
-
-  #region Interaction
-
-  /// <summary>
-  /// Make waves from a point
-  /// </summary>
-  /// <param name="location"></param>
-  /// <param name="force"></param>
-  public void Splash(Vector3 location, int force)
-  {
-    // Find the touched part
-    for (int i = 0; i < (size - 1); i++)
-    {
-      if (location.x >= parts[i].boundsMin.x
-        && location.x < parts[i].boundsMax.x)
-      {
-        if (location.y <= parts[i].boundsMin.y
-       && location.y > parts[i].boundsMax.y)
+        // we'll use spheres to represent each vertex for demonstration purposes
+        for (int i = 0; i < size; i++)
         {
-          Splash(i, force);
+            // Create a game object
+            GameObject go = new GameObject("WavePart");
+            go.transform.parent = this.transform;
+            go.transform.localPosition = new Vector3(i - (size / 2), 0, 0);
+
+            parts[i].gameObject = go;
         }
-      }
+
+        // Create the meshes
+        for (int i = 0; i < size; i++)
+        {
+            GameObject go = parts[i].gameObject;
+
+            // Except for the last point
+            if (i < size - 1)
+            {
+                Mesh mesh = new Mesh();
+                mesh.MarkDynamic();
+                parts[i].mesh = mesh;
+
+                go.AddComponent<MeshFilter>();
+                go.AddComponent<MeshRenderer>();
+
+                // Define vertices for the mesh (the points of the model)
+                UpdateMeshVertices(i);
+
+                // Define triangles and normals
+                InitializeTrianglesAndNormalsForMesh(i);
+
+                go.GetComponent<MeshFilter>().mesh = mesh;
+                go.GetComponent<MeshRenderer>().material = material;
+            }
+        }
+
+        // Small wave
+        Splash(size / 2, 10);
     }
 
-  }
+#if UNITY_EDITOR
+    /// <summary>
+    /// SUPER VIOLENT METHOD FOR EDITOR MODE
+    /// </summary>
+    private void Clear()
+    {
+        for (int i = 0; i < size; i++)
+        {
+            DestroyImmediate(parts[i].mesh);
+            DestroyImmediate(parts[i].gameObject);
+        }
 
-  private void Splash(int i, int heightModifier)
-  {
-    parts[i].gameObject.transform.localPosition = new Vector3(
-      parts[i].gameObject.transform.localPosition.x,
-      parts[i].gameObject.transform.localPosition.y + heightModifier,
-      parts[i].gameObject.transform.localPosition.z
-      );
-  }
+        parts = null;
+    }
+#endif
 
-  #endregion
+    private void UpdateMeshVertices(int i)
+    {
+        Mesh mesh = parts[i].mesh;
+        if (mesh == null) return;
+
+        Transform current = parts[i].gameObject.transform;
+
+        Transform next = current;
+        if (i < parts.Length - 1)
+        {
+            next = parts[i + 1].gameObject.transform;
+        }
+
+        Vector3 left = Vector3.zero;
+        Vector3 right = next.localPosition - current.localPosition;
+
+        // Get all parts of the mesh (it's just 2 planes, one on top and one on the front face)
+        Vector3 topLeftFront = new Vector3(left.x, left.y, 0);
+        Vector3 topRightFront = new Vector3(right.x, right.y, 0);
+        Vector3 topLeftBack = new Vector3(left.x, left.y, 1);
+        Vector3 topRightBack = new Vector3(right.x, right.y, 1);
+        Vector3 bottomLeftFront = new Vector3(left.x, left.y + (0 - Height), 0);
+        Vector3 bottomRightFront = new Vector3(right.x, right.y + (0 - Height), 0);
+
+        mesh.vertices = new Vector3[] { topLeftFront, topRightFront, topLeftBack, topRightBack, bottomLeftFront, bottomRightFront };
+
+        parts[i].boundsMin = topLeftFront + current.position;
+        parts[i].boundsMax = bottomRightFront + current.position;
+    }
+
+    private void InitializeTrianglesAndNormalsForMesh(int i)
+    {
+        Mesh mesh = parts[i].mesh;
+        if (mesh == null) return;
+
+        // Normals
+        var uvs = new Vector2[mesh.vertices.Length];
+        for (int i2 = 0; i2 < uvs.Length; i2++)
+        {
+            uvs[i2] = new Vector2(mesh.vertices[i2].x, mesh.vertices[i2].z);
+        }
+        mesh.uv = uvs;
+
+        // Triangles
+        mesh.triangles = new int[] { 5, 4, 0, 0, 1, 5, 0, 2, 3, 3, 1, 0 };
+
+        // For shader
+        mesh.RecalculateNormals();
+    }
+
+    void Update()
+    {
+#if UNITY_EDITOR
+        // Size has been updated?
+        if (Width != size || Height != currentHeight)
+        {
+            cleanRequested = true;
+        }
+
+        // Recalculate everything!
+        // This should be for the editor only!
+        if (cleanRequested)
+        {
+            cleanRequested = false;
+            Debug.Log("Reinitializing water. Make sure we are in editor mode!");
+            Clear();
+            Initialize();
+        }
+
+        color = material.color;
+#endif
+
+        // Water tension is simulated by a simple linear convolution over the height field.
+        for (int i = 1; i < size - 1; i++)
+        {
+#if UNITY_EDITOR
+            // Objects deleted from editor
+            if (parts[i].gameObject == null)
+            {
+                cleanRequested = true;
+                return;
+            }
+#endif
+            int j = i - 1;
+            int k = i + 1;
+            parts[i].height = (parts[i].gameObject.transform.localPosition.y + parts[j].gameObject.transform.localPosition.y + parts[k].gameObject.transform.localPosition.y) / 3.0f;
+        }
+
+        // Velocity and height are updated...
+        for (int i = 0; i < size; i++)
+        {
+            // update velocity and height
+            parts[i].velocity = (parts[i].velocity + (parts[i].height - parts[i].gameObject.transform.localPosition.y)) * velocityDamping;
+
+            float timeFactor = Time.deltaTime * timeScale;
+            if (timeFactor > 1f) timeFactor = 1f;
+
+            parts[i].height += parts[i].velocity * timeFactor;
+
+            // Update the dot position
+            Vector3 newPosition = new Vector3(
+                parts[i].gameObject.transform.localPosition.x,
+                parts[i].height,
+                parts[i].gameObject.transform.localPosition.z);
+            parts[i].gameObject.transform.localPosition = newPosition;
+        }
+
+        // Update meshes
+        for (int i = 0; i < size; i++)
+        {
+            UpdateMeshVertices(i);
+        }
+    }
+
+    #region Interaction
+
+    /// <summary>
+    /// Make waves from a point
+    /// </summary>
+    /// <param name="location"></param>
+    /// <param name="force"></param>
+    public void Splash(Vector3 location, int force)
+    {
+        // Find the touched part
+        for (int i = 0; i < (size - 1); i++)
+        {
+            if (location.x >= parts[i].boundsMin.x
+              && location.x < parts[i].boundsMax.x)
+            {
+                if (location.y <= parts[i].boundsMin.y
+               && location.y > parts[i].boundsMax.y)
+                {
+                    Splash(i, force);
+                }
+            }
+        }
+
+    }
+
+    private void Splash(int i, int heightModifier)
+    {
+        parts[i].gameObject.transform.localPosition = new Vector3(
+          parts[i].gameObject.transform.localPosition.x,
+          parts[i].gameObject.transform.localPosition.y + heightModifier,
+          parts[i].gameObject.transform.localPosition.z
+          );
+    }
+
+    #endregion
 }
 
 #endregion
