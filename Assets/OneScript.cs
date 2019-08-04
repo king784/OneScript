@@ -121,6 +121,11 @@ public class GameHandler : MonoBehaviour
         targetRot = boat.transform.rotation;
         //bottomLeftOfScreen = Camera.main.ViewportToWorldPoint(new Vector2(0f, 0f)); 
         GiveColor(boat, new Color(0.25f, 0.1f, 0.1f, 1.0f));
+        boat.AddComponent<BoxCollider2D>();
+        boat.GetComponent<BoxCollider2D>().size = new Vector2(1.4f, 1f);
+		boat.AddComponent<Rigidbody2D>();
+		boat.GetComponent<Rigidbody2D>().mass = 0.0f;
+		boat.AddComponent<BoatCollision>();
 
         gameManager = new GameObject();
         gameManager.transform.name = "OneScript";
@@ -131,6 +136,10 @@ public class GameHandler : MonoBehaviour
         water.transform.position -= Vector3.up * 2.0f;
         water.AddComponent<WaterLine>();
         theWaterLine = water.GetComponent<WaterLine>();
+
+		GameObject highScoreManager = new GameObject();
+		highScoreManager.transform.name = "HighScoreManager";
+		highScoreManager.AddComponent<HighScores>();
 
         // UI
         GameObject mainCanvas = new GameObject();
@@ -172,7 +181,8 @@ public class GameHandler : MonoBehaviour
         // Rock
         GameObject rock = new GameObject();
         rocks.Add(rock);
-        rock.AddComponent<EdgeCollider2D>();
+        rock.AddComponent<BoxCollider2D>();
+		rock.GetComponent<BoxCollider2D>().offset = new Vector2(1.2f, 1.0f);
         rock.AddComponent<DestoyRock>();
         rock.transform.name = "Rock";
         CreateRock(rock);
@@ -226,7 +236,7 @@ public class GameHandler : MonoBehaviour
             isInAir = false;
         }
 
-        if(Input.GetButtonDown("Jump") && !isInAir)
+        if((Input.GetButtonDown("Jump") || Input.touchCount > 0) && !isInAir)
         {
             theWaterLine.parts[19].gameObject.transform.Translate(0.0f, 2.0f, 0.0f);
             boat.transform.Rotate(0.0f, 0.0f, 20.0f);
@@ -239,7 +249,7 @@ public class GameHandler : MonoBehaviour
     }
 
     // https://answers.unity.com/questions/1007886/how-to-set-the-new-unity-ui-rect-transform-anchor.html
-      public void SetAndStretchToParentSize(RectTransform _mRect, RectTransform _parent)
+    public void SetAndStretchToParentSize(RectTransform _mRect, RectTransform _parent)
     {
         _mRect.anchoredPosition = _parent.position;
         _mRect.anchorMin = new Vector2(0, 0);
@@ -522,6 +532,44 @@ public class GameHandler : MonoBehaviour
     {
         superMaterial = new Material(Shader.Find("Custom/SuperShader"));
     }
+}
+
+public class HighScores : MonoBehaviour
+{
+	const string privateCode = "MuRxpKnQ5UG6MFxUiHFIPwDD1q5H_RN0C85s85gPySsw";
+	const string publicCode = "5d466ad97682811758c1fad5";
+	const string webURL = "http://dreamlo.com/lb/";
+
+	public void StartUploadingHighscore(string username, float newHighscore)
+	{
+		StartCoroutine(UploadHighscore(username, newHighscore));
+	}
+
+	IEnumerator UploadHighscore(string username, float newHighscore)
+	{
+		WWW www = new WWW(webURL + privateCode + "/add/" + WWW.EscapeURL(username) + "/" + newHighscore);
+		yield return www;
+
+		if(string.IsNullOrEmpty(www.error))
+		{
+			print("yay");
+		}
+		else
+		{
+			print("error");
+		}
+	}
+}
+
+public class BoatCollision : MonoBehaviour
+{
+	private void OnCollisionEnter2D(Collision2D other) 
+	{
+		if(other.transform.name == "Rock")
+		{
+			Debug.Log("RIP");
+		}	
+	}
 }
 
 public class DestoyRock : MonoBehaviour
